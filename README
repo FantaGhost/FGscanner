@@ -32,3 +32,5 @@ Usage: ./fgscan.pl --host=hostname [--proxy=filepath] [--sec=n] [--dump] [--dirl
 
 ### Official Home Page
 http://www.fantaghost.com/fgscanner
+
+
