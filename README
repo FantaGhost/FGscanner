@@ -13,6 +13,8 @@ git clone https://github.com/FantaGhost/FGscanner.git
 cd ./FGscanner
 chmod +x fgscan.pl
 
+Check INSTALL file for needed Perl modules.
+
 ### Usage
 
 Usage: ./fgscan.pl --host=hostname [--proxy=filepath] [--sec=n] [--dump] [--dirlist=filepath] [--wordlist=filepath] [--tor] [--tordns] [--debug] [--help]
