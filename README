@@ -4,9 +4,16 @@ Advanced web directory scanner with proxy and TOR support
 
 #### About
 
-This is an opensource advanced web directory scanner to find hidden contents on a web server using dictionary-like attack. FantaGhost URL scanner support proxy and TOR.
+FGscanner is an advanced opensource web directory scanner. It find hidden contents on a web server using dictionary-like attack.
+FantaGhost URL scanner support proxy and TOR requests.
 
-All options explained here are also available from `fgdev.pl --help`)
+### Install
+
+git clone https://github.com/FantaGhost/FGscanner.git
+cd ./FGscanner
+chmod +x fgscan.pl
+
+### Usage
 
 Usage: ./fgscan.pl --host=hostname [--proxy=filepath] [--sec=n] [--dump] [--dirlist=filepath] [--wordlist=filepath] [--tor] [--tordns] [--debug] [--help]
 
@@ -18,10 +25,8 @@ Usage: ./fgscan.pl --host=hostname [--proxy=filepath] [--sec=n] [--dump] [--dirl
 --sec	   : Seconds between requests. Value 999 will randomize delay between requests from 1 to 30 seconds
 --dump     : Save found pages on disk
 --tor      : Use TOR as proxy for each request
---tordns   : Use TOR to resolve hostname. Without this options DNS queries will be directed to default DNS server outside TOR network.
---help     : What you're reading now
+--tordns   : Use TOR to resolve hostname. Without this options DNS queries will be directed to default DNS server outside TOR network
+--help     : Show this help
 
 ### Official Home Page
 http://www.fantaghost.com/fgscanner
-
-
