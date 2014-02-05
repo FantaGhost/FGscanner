@@ -42,7 +42,7 @@ $istor=0;
 if ($help) {
 	print <<__HELP__;
 fgscan 1.0
-Usage: $0 --host <hostname> [--proxy=filepath] [--ua-rnd] [--sec=n] [--dump] [--dirlist=filepath] [--wordlist=filepath] [--tor] [--tordns] [--debug] [--help]
+Usage: $0 --host <hostname> [--proxy=filepath] [--uarnd] [--sec=n] [--dump] [--dirlist=filepath] [--wordlist=filepath] [--tor] [--tordns] [--debug] [--help]
 
 Where:
 --debug    : Print debug information

@@ -23,6 +23,7 @@ Usage: ./fgscan.pl --host=hostname [--proxy=filepath] [--sec=n] [--dump] [--dirl
 --debug    : Print debug information
 --dirs     : Specify the directory list file
 --pages    : Specify the wordlist file
+--uarnd    : Enable User Agent randomization
 --host     : Specify hostname to scan (without http:// or https://)
 --proxy    : Specify a proxy list
 --sec	   : Seconds between requests. Value 999 will randomize delay between requests from 1 to 30 seconds
