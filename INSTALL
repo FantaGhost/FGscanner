@@ -1,4 +1,4 @@
-In order to run FGscanner you must have PERL installed and configured on your system.
+In order to run FGscanner you MUST have PERL installed and configured on your system.
 FGscanner use three Perl modules that you must install if not already available on your system:
 - LWP::UserAgent
 - Getopt::Long

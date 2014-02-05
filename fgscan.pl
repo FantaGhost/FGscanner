@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
-# FantaGhost URL Scanner 1.0
-# Last update: 2013-10-19
+# FantaGhost URL Scanner 1.1
+# Last update: 2014-02-01
 
 use LWP::UserAgent;
 use Getopt::Long;
@@ -9,10 +9,11 @@ use IO::Socket::PortState qw(check_ports);
 
 my $dirlist="fg_dirs.txt";       
 my $pagelist="fg_pages.txt";     
-my $useragent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/12.0";
+my $ualist="fg_ua.lst";
+my $useragent="FGscanner/1.1 (Cli; FGscanner-Perl; CrossPlatform; rv:1.1) Perl-FGscanner/20140201";
 my $delay=0;              	 
 my $maxdelay=30;
-my $httpout=10;		         
+my $httpout=15;		         
 my $pidFile="/var/run/fgscan.pid";
 my $proxyFile="";
 my $host="";
@@ -25,6 +26,7 @@ my $args = GetOptions(
 	"dirs=s"		=> \$dirlist,
         "pages=s"		=> \$pagelist,
         "proxy=s"               => \$proxyFile,
+        "uarnd"                 => \$uarnd,
 	"host=s"		=> \$host,
 	"sec=s"			=> \$delay,
         "dump"                  => \$dump,
@@ -40,13 +42,14 @@ $istor=0;
 if ($help) {
 	print <<__HELP__;
 fgscan 1.0
-Usage: $0 --host=hostname [--proxy=filepath] [--sec=n] [--dump] [--dirlist=filepath] [--wordlist=filepath] [--tor] [--tordns] [--debug] [--help]
+Usage: $0 --host <hostname> [--proxy=filepath] [--ua-rnd] [--sec=n] [--dump] [--dirlist=filepath] [--wordlist=filepath] [--tor] [--tordns] [--debug] [--help]
 
 Where:
 --debug    : Print debug information
 --dirs     : Specify the directory list file
 --pages    : Specify the wordlist file
---host     : Specify hostname to scan (without http:// or https://)
+--uarnd    : Enable User-Agent randomization
+--host     : Specify hostname to scan (hostname only without http:// or https://)
 --proxy    : Specify a proxy list
 --sec	   : Seconds between requests. Value 999 will randomize delay between requests from 1 to 30 seconds
 --dump     : Save found pages on disk
@@ -59,15 +62,16 @@ __HELP__
 
 die "Directories list not found.\n" unless (-e $dirlist);
 die "Pages list not found.\n" unless (-e $pagelist);
+die "User Agent list not found.\n" unless (-e $ualist);
 die "You must specify an hostname to scan. Please run --help for more information.\n" unless $host ne "";
-
 
 ($debug) && print "+++ Debug Mode Activated +++ \n";
 ($debug) && print "--- Selected hostname: ".$host."\n";
 ($debug) && print "--- Directories list: ".$dirlist."\n";
 ($debug) && print "--- Pages list: ".$pagelist."\n";
 ($debug) && print "--- Delay: ".$delay."\n";
-($debug) && print "--- User Agent: ".$useragent."\n";
+($debug) && ($uarnd) && print "--- User Agent Randomization Enabled\n";
+($debug) && (!$uarnd) && print "--- User Agent: ".$useragent."\n";
 ($debug) && print "--- HTTP TimeOut: ".$httpout." seconds.\n";
 ($tor) && CheckTor();
 ($debug) && print "--- Tor usage is set to ".$istor."\n";
@@ -78,7 +82,7 @@ if ($proxyFile) {
    (-r $proxyFile) or die "Cannot read proxy configuration file $proxyFile: $!";
    loadProxyFromFile($proxyFile) || die "Cannot load proxies from file $proxyFile";
 } else {
-   ($debug) && print "No proxy configured...\n";
+   ($debug) && print "--- No proxy configured...\n";
 }
 
 if ($tordns) {
@@ -87,12 +91,20 @@ if ($tordns) {
     $host=$hostip;
 }
 
-($debug) && sleep(3);
+($debug) && sleep(2);
+
+print "\nStarting scan on ".$host."\n";
 
 while( my $line = <$dirs>) {
-    print "Starting scan on ".$host."\n";
-    unless($line =~ /^\s*$/) {
-      ($debug) && print "Directory readed ".$line."\n";
+      
+      unless($line =~ /^\s*$/) {
+    
+      if ($uarnd) {
+         $useragent = RandomUa();
+      }  
+
+      ($debug) && print "\nDirectory readed ".$line;
+      
       if ($delay == 999) {
          $delayrand=int(rand($maxdelay));
          ($debug) && print "Waiting ".$delayrand." second...\n";
@@ -103,18 +115,16 @@ while( my $line = <$dirs>) {
       }
       if (@proxies) {
           $tempProxy = selectRandomProxy();
-          $ua->proxy('http', $tempProxy);
+          $ua->proxy('http', $useragent);
           ($debug) && print "Proxy used: ".$tempProxy."\n";
       }
       if ($istor==1) {
           $ua->proxy('http', 'socks://localhost:9050'); # Tor proxy
           ($debug) && print "Proxy used: TOR\n";
       }
-      ($debug) && print "LWP Object created ".$ua."\n";
       $ua->agent($useragent);
-      ($debug) && print "User Agent set ".$useragent."\n";
+      ($debug) && print "User Agent : ".$useragent;
       $ua->timeout($httpout);
-      ($debug) && print "HTTP timeout set ".$httpout."\n";
       $http_request="http://".$host."/".$line;     
       $http_request=~ tr/\r\n//d;
       ($debug) && print "Request created ".$http_request."\n";
@@ -143,7 +153,6 @@ while( my $line = <$dirs>) {
                $ua2->agent($useragent);
                ($debug) && print "User Agent set ".$useragent."\n";
                $ua2->timeout($httpout);
-               ($debug) && print "HTTP timeout set ".$httpout."\n";
                my $http_request2=$http_request."/".$line2;
                $http_request2=~ tr/\r\n//d;
                $timestamp=localtime;
@@ -233,3 +242,17 @@ sub CheckTor {
            exit 1;
         }
 }
+
+sub RandomUa {
+       my $text="";
+       open(UALST,"$ualist") or die "Can't open `$ualist': $!";
+       while ($text ne $useragent) {
+          srand();
+          rand($.) < 1 && ($text = $_) while <UALST>;
+          $useragent = $text;
+       }
+       close(UALST);
+       sleep(3);
+       return($text);
+}
+
