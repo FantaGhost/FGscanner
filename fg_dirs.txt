@@ -6,7 +6,6 @@ webstats
 webstat
 webalizer
 usage
-phpmyadmin
 log
 logs
 administrator
@@ -16,6 +15,11 @@ webdisk
 dump
 dumps
 xfer
+typo3
+staging
+stage
+phpmyadmin
+core
 transfer
 home
 user
